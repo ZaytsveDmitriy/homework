@@ -2,48 +2,77 @@ package hw02unpackstring
 
 import (
 	"errors"
+	"fmt"
 	"unicode"
 )
 
 var ErrInvalidString = errors.New("invalid string")
 
 const (
-	Digit  = 1
-	Leter  = iota
+	None   = 0
+	Digit  = iota
+	Letter = iota
 	Shield = iota
 )
+
+func checkType(s rune) int {
+	switch {
+	case s == '\\':
+		return Shield
+	case unicode.IsDigit(s):
+		return Digit
+	case unicode.IsLetter(s):
+		return Letter
+	default:
+		return Letter
+	}
+}
 
 func Unpack(s string) (string, error) {
 	// Place your code here.
 
 	if len(s) == 0 {
-		return s, nil
+		return "", nil
 	}
 
 	input := []rune(s)
-	if unicode.IsDigit(input[0]) {
-		return "", ErrInvalidString
-	}
+	output := make([]rune, 0, len(s)*2)
+	first := input[0]
+	lastType := None
 
-	output := make([]rune, 0, len(s))
-	lastRune := input[0]
-	output = append(output, lastRune)
+	fmt.Println(string(input))
+
+	switch checkType(first) {
+	case Digit:
+		return "", ErrInvalidString
+	case Letter:
+		lastType = Letter
+		output = append(output, first)
+	case Shield:
+		lastType = Shield
+	}
 
 	if len(input) > 1 {
 		for _, r := range input[1:] {
 			switch {
-			case unicode.IsDigit(lastRune) && unicode.IsDigit(r):
+			case lastType == Digit && checkType(r) == Digit:
 				return "", ErrInvalidString
-			case unicode.IsLetter(lastRune) && r == '0':
-				output = output[:len(output)-1]
-			case unicode.IsLetter(lastRune) && unicode.IsDigit(r):
-				for i := 0; i < int(r-'0')-1; i++ {
-					output = append(output, lastRune)
-				}
-				lastRune = r
-			case unicode.IsLetter(r):
+			case lastType == Shield:
+				lastType = Letter
 				output = append(output, r)
-				lastRune = r
+			case lastType == Letter && checkType(r) == Shield:
+				lastType = Shield
+			case lastType == Letter && r == '0':
+				output = output[:len(output)-1]
+				lastType = Digit
+			case lastType == Letter && checkType(r) == Digit:
+				for i := 0; i < int(r-'0')-1; i++ {
+					output = append(output, output[len(output)-1])
+				}
+				lastType = Digit
+			default:
+				output = append(output, r)
+				lastType = Letter
 			}
 		}
 	}
