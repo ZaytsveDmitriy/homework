@@ -2,6 +2,7 @@ package hw03frequencyanalysis
 
 import (
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -33,10 +34,10 @@ func Top10(s string) []string {
 		return nil
 	}
 
-	words := strings.Fields(s)
+	words := regexp.MustCompile(`(\S*[^[:punct:]\s])|[-]{2,}`).FindAllString(s, -1)
 	cntWords := make(map[string]int)
 	for _, w := range words {
-		cntWords[w]++
+		cntWords[strings.ToLower(w)]++
 	}
 	variants := make([]int, 0, len(cntWords))
 
