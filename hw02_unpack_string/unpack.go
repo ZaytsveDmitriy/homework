@@ -21,8 +21,6 @@ func checkType(s rune) int {
 		return Shield
 	case unicode.IsDigit(s):
 		return Digit
-	case unicode.IsLetter(s):
-		return Letter
 	default:
 		return Letter
 	}
@@ -52,29 +50,28 @@ func Unpack(s string) (string, error) {
 		lastType = Shield
 	}
 
-	if len(input) > 1 {
-		for _, r := range input[1:] {
-			switch {
-			case lastType == Digit && checkType(r) == Digit:
-				return "", ErrInvalidString
-			case lastType == Shield:
-				lastType = Letter
-				output = append(output, r)
-			case lastType == Letter && checkType(r) == Shield:
-				lastType = Shield
-			case lastType == Letter && r == '0':
-				output = output[:len(output)-1]
-				lastType = Digit
-			case lastType == Letter && checkType(r) == Digit:
-				for i := 0; i < int(r-'0')-1; i++ {
-					output = append(output, output[len(output)-1])
-				}
-				lastType = Digit
-			default:
-				output = append(output, r)
-				lastType = Letter
+	for _, r := range input[1:] {
+		switch {
+		case lastType == Digit && checkType(r) == Digit:
+			return "", ErrInvalidString
+		case lastType == Shield:
+			lastType = Letter
+			output = append(output, r)
+		case lastType == Letter && checkType(r) == Shield:
+			lastType = Shield
+		case lastType == Letter && r == '0':
+			output = output[:len(output)-1]
+			lastType = Digit
+		case lastType == Letter && checkType(r) == Digit:
+			for i := 0; i < int(r-'0')-1; i++ {
+				output = append(output, output[len(output)-1])
 			}
+			lastType = Digit
+		default:
+			output = append(output, r)
+			lastType = Letter
 		}
 	}
+
 	return string(output), nil
 }
