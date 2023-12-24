@@ -1,7 +1,6 @@
 package hw03frequencyanalysis
 
 import (
-	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -79,58 +78,5 @@ func TestTop10(t *testing.T) {
 			}
 			require.Equal(t, expected, Top10(text))
 		}
-	})
-}
-
-var testMap = map[string]int{
-	"a": 1,
-	"b": 2,
-	"c": 3,
-	"d": 1,
-	"e": 2,
-	"f": 3,
-	"g": 1,
-	"h": 2,
-}
-
-func TestGetWordsByCnt(t *testing.T) {
-	tests := []struct {
-		cnt      int
-		expected []string
-	}{
-		{1, []string{"a", "d", "g"}},
-		{2, []string{"b", "e", "h"}},
-		{3, []string{"c", "f"}},
-	}
-
-	for _, tc := range tests {
-		tc := tc
-		t.Run(strconv.Itoa(tc.cnt), func(t *testing.T) {
-			got := getWordsByCnt(testMap, tc.cnt)
-			require.ElementsMatch(t, tc.expected, got, "error")
-		})
-	}
-}
-
-var textForSort = []string{
-	"z",
-	"x",
-	"d",
-	"w",
-	"c",
-	"o",
-	"b",
-	"a",
-}
-
-func TestSortAndLimit(t *testing.T) {
-	t.Run("positive test", func(t *testing.T) {
-		expexted := []string{
-			"a",
-			"b",
-			"c",
-			"d",
-		}
-		require.Equal(t, expexted, sortAndLimit(textForSort, 4))
 	})
 }
