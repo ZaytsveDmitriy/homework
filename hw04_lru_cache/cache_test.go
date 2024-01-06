@@ -50,30 +50,71 @@ func TestCache(t *testing.T) {
 	})
 
 	t.Run("purge logic", func(t *testing.T) {
-		// Write me
+		c := NewCache(3)
+
+		for i := 0; i <= 2; i++ {
+			c.Set(Key(strconv.Itoa(i)), i)
+		} // [2, 1, 0]
+
+		c.Set("3", 3) // [3, 2, 1]
+		val, ok := c.Get("0")
+		require.False(t, ok)
+		require.Nil(t, val)
+
+		c.Get("1")     // [1, 3, 2]
+		c.Set("2", 22) // [22, 1, 3]
+		c.Set("4", 4)  // [4, 22, 1]
+
+		val, ok = c.Get("3")
+		require.False(t, ok)
+		require.Nil(t, val)
+
+		c.Get("1")    // [1, 4, 22]
+		c.Set("5", 5) // [5, 1, 4]
+
+		val, ok = c.Get("22")
+		require.False(t, ok)
+		require.Nil(t, val)
+	})
+
+	t.Run("clear cache", func(t *testing.T) {
+		c := NewCache(3)
+
+		for i := 0; i <= 2; i++ {
+			c.Set(Key(strconv.Itoa(i)), i)
+		} // [2, 1, 0]
+
+		c.Clear()
+		for i := 0; i <= 2; i++ {
+			val, ok := c.Get(Key(strconv.Itoa(i)))
+			require.Nil(t, val)
+			require.False(t, ok)
+		}
 	})
 }
 
 func TestCacheMultithreading(t *testing.T) {
-	t.Skip() // Remove me if task with asterisk completed.
+	t.Run("parallel", func(t *testing.T) {
+		defer require.Nil(t, recover())
 
-	c := NewCache(10)
-	wg := &sync.WaitGroup{}
-	wg.Add(2)
+		c := NewCache(10)
+		wg := &sync.WaitGroup{}
+		wg.Add(2)
 
-	go func() {
-		defer wg.Done()
-		for i := 0; i < 1_000_000; i++ {
-			c.Set(Key(strconv.Itoa(i)), i)
-		}
-	}()
+		go func() {
+			defer wg.Done()
+			for i := 0; i < 1_000_000; i++ {
+				c.Set(Key(strconv.Itoa(i)), i)
+			}
+		}()
 
-	go func() {
-		defer wg.Done()
-		for i := 0; i < 1_000_000; i++ {
-			c.Get(Key(strconv.Itoa(rand.Intn(1_000_000))))
-		}
-	}()
+		go func() {
+			defer wg.Done()
+			for i := 0; i < 1_000_000; i++ {
+				c.Get(Key(strconv.Itoa(rand.Intn(1_000_000))))
+			}
+		}()
 
-	wg.Wait()
+		wg.Wait()
+	})
 }
