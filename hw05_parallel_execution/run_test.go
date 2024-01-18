@@ -67,4 +67,58 @@ func TestRun(t *testing.T) {
 		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were completed")
 		require.LessOrEqual(t, int64(elapsedTime), int64(sumTime/2), "tasks were run sequentially?")
 	})
+
+	t.Run("tasks with zerro allow errors", func(t *testing.T) {
+		tasksCount := 2
+		tasks := make([]Task, 0, tasksCount)
+
+		for i := 0; i < tasksCount; i++ {
+			taskSleep := time.Millisecond * time.Duration(rand.Intn(10*(i+1)))
+
+			tasks = append(tasks, func() error {
+				time.Sleep(taskSleep)
+				return nil
+			})
+		}
+
+		workersCount := 2
+		maxErrorsCount := 0
+
+		err := Run(tasks, workersCount, maxErrorsCount)
+
+		require.ErrorIs(t, err, ErrErrorsLimitExceeded, "actual err - %v", err)
+	})
+
+	t.Run("concurency with eventually", func(t *testing.T) {
+		tasksCount := 50
+		tasks := make([]Task, 0, tasksCount)
+
+		var runTasksCount int32
+		var sumTime time.Duration
+
+		for i := 0; i < tasksCount; i++ {
+			waitTime := time.Millisecond * time.Duration(rand.Intn(100))
+			sumTime += waitTime
+
+			tasks = append(tasks, func() error {
+				t := time.NewTimer(waitTime)
+				<-t.C
+				atomic.AddInt32(&runTasksCount, 1)
+				return nil
+			})
+		}
+
+		workersCount := 5
+		maxErrorsCount := 1
+
+		err := Run(tasks, workersCount, maxErrorsCount)
+
+		require.NoError(t, err)
+		require.Eventually(t, func() bool {
+			return tasksCount == int(atomic.LoadInt32(&runTasksCount))
+		},
+			sumTime/2,
+			10*time.Millisecond,
+			"look like not concurency func")
+	})
 }
