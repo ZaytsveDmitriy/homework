@@ -89,6 +89,27 @@ func TestRun(t *testing.T) {
 		require.ErrorIs(t, err, ErrErrorsLimitExceeded, "actual err - %v", err)
 	})
 
+	t.Run("tasks with zerro allow workers", func(t *testing.T) {
+		tasksCount := 2
+		tasks := make([]Task, 0, tasksCount)
+
+		for i := 0; i < tasksCount; i++ {
+			taskSleep := time.Millisecond * time.Duration(rand.Intn(10*(i+1)))
+
+			tasks = append(tasks, func() error {
+				time.Sleep(taskSleep)
+				return nil
+			})
+		}
+
+		workersCount := 0
+		maxErrorsCount := 0
+
+		err := Run(tasks, workersCount, maxErrorsCount)
+
+		require.ErrorIs(t, err, ErrNoWorkersAllow, "actual err - %v", err)
+	})
+
 	t.Run("concurency with eventually", func(t *testing.T) {
 		tasksCount := 50
 		tasks := make([]Task, 0, tasksCount)

@@ -7,7 +7,10 @@ import (
 	"sync/atomic"
 )
 
-var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
+var (
+	ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
+	ErrNoWorkersAllow      = errors.New("allow workers qnt less 1")
+)
 
 type Task func() error
 
@@ -15,7 +18,9 @@ func Run(tasks []Task, n, m int) error {
 	if len(tasks) < 1 {
 		return nil
 	}
-
+	if n < 1 {
+		return ErrNoWorkersAllow
+	}
 	if m < 1 {
 		return fmt.Errorf("%w: less then 1 error allow", ErrErrorsLimitExceeded)
 	}
@@ -29,7 +34,10 @@ func Run(tasks []Task, n, m int) error {
 	wg.Add(n)
 
 	for i := 0; i < n; i++ {
-		go worker(chTasks, &errCnt, chClose, &wg)
+		go func() {
+			worker(chTasks, &errCnt, chClose)
+			wg.Done()
+		}()
 	}
 
 	for _, task := range tasks {
@@ -51,8 +59,7 @@ func Run(tasks []Task, n, m int) error {
 	return nil
 }
 
-func worker(chTasks <-chan Task, errCnt *atomic.Int64, chClose <-chan struct{}, wg *sync.WaitGroup) {
-	defer wg.Done()
+func worker(chTasks <-chan Task, errCnt *atomic.Int64, chClose <-chan struct{}) {
 	for {
 		task, hasTask := <-chTasks
 		if !hasTask {
