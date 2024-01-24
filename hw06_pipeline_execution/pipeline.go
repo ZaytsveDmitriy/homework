@@ -8,8 +8,13 @@ type (
 
 type Stage func(in In) (out Out)
 
-func stageWraper(in In, done In, stage Stage) Out {
+func stageWrapper(in In, done In, stage Stage) Out {
 	inputCh := make(Bi)
+
+	if stage == nil {
+		return in
+	}
+
 	go func() {
 		defer close(inputCh)
 		for {
@@ -34,7 +39,7 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 	}
 	lastOut := in
 	for _, stage := range stages {
-		lastOut = stageWraper(lastOut, done, stage)
+		lastOut = stageWrapper(lastOut, done, stage)
 	}
 
 	return lastOut
