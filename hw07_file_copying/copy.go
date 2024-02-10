@@ -57,8 +57,6 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 
 	if limit == 0 {
 		limit = info.Size()
-	} else {
-		limit = min(info.Size(), limit)
 	}
 
 	distFile, err := os.Create(toPath)
@@ -67,8 +65,11 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	}
 
 	stat := pb.Full.Start64(limit)
-	proxyReader := stat.NewProxyReader(file)
-	io.CopyN(distFile, proxyReader, limit)
+
+	reader := io.NewSectionReader(file, offset, limit)
+	proxyReader := stat.NewProxyReader(reader)
+	// io.CopyN(distFile, proxyReader, limit)
+	io.Copy(distFile, proxyReader)
 	stat.Finish()
 
 	return nil
