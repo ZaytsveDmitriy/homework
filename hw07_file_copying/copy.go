@@ -49,7 +49,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	switch {
 	case info.IsDir():
 		return fmt.Errorf("%w: file is directory", ErrUnsupportedFile)
-	case info.Size() <= 0:
+	case info.Size() < 0:
 		return fmt.Errorf("%w: file size <= 0", ErrUnsupportedFile)
 	case info.Size() < offset:
 		return fmt.Errorf("%w: offset %v, file size %v", ErrOffsetExceedsFileSize, offset, info.Size())
@@ -68,7 +68,6 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 
 	reader := io.NewSectionReader(file, offset, limit)
 	proxyReader := stat.NewProxyReader(reader)
-	// io.CopyN(distFile, proxyReader, limit)
 	io.Copy(distFile, proxyReader)
 	stat.Finish()
 
