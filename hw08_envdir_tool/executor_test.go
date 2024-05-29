@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/require" //nolint:depguard
+	"github.com/stretchr/testify/require"
 )
 
 func TestRunCmd(t *testing.T) {
@@ -31,9 +31,9 @@ with new line`, false},
 		"UNSET": EnvValue{"", true},
 	}
 
-	cmds := []string{"bin/bash", "./testdata/echo.sh", "arg1=1", "arg2=2"}
+	cmds := []string{"bash", "./testdata/echo.sh", "arg1=1", "arg2=2"}
 
-	t.Run("not exist path", func(t *testing.T) {
+	t.Run("envs test", func(t *testing.T) {
 		stdOut := os.Stdout
 		r, w, err := os.Pipe()
 		if err != nil {
