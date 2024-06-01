@@ -23,7 +23,7 @@ var (
 	ErrDirEmpty      = errors.New("dir is empty")
 	ErrOpenFile      = errors.New("can`t open file")
 	ErrUnexpected    = errors.New("unexpected error")
-	ErrForbiddenChar = errors.New("env contain forbidden char")
+	ErrForbiddenChar = errors.New("file name contain forbidden char")
 )
 
 func normalize(b []byte) string {
@@ -61,6 +61,9 @@ func ReadDir(dir string) (Environment, error) {
 		if err != nil {
 			return nil, fmt.Errorf("%w: %w", ErrUnexpected, err)
 		}
+		if strings.Contains(fInfo.Name(), "=") {
+			return nil, ErrForbiddenChar
+		}
 
 		if fInfo.Size() == 0 {
 			env[fInfo.Name()] = EnvValue{Value: "", NeedRemove: true}
@@ -71,9 +74,6 @@ func ReadDir(dir string) (Environment, error) {
 		envVal, _, err := reader.ReadLine()
 		if err != nil {
 			return nil, fmt.Errorf("%w: %w", ErrUnexpected, err)
-		}
-		if strings.Contains(string(envVal), "=") {
-			return nil, ErrForbiddenChar
 		}
 
 		env[fInfo.Name()] = EnvValue{Value: normalize(envVal), NeedRemove: false}
