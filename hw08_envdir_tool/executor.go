@@ -16,7 +16,6 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 	for name, e := range env {
 		if e.NeedRemove {
 			ex.Env = append(ex.Env, name+"=")
-			continue
 		} else {
 			os.Setenv(name, e.Value)
 			ex.Env = append(ex.Env, fmt.Sprint(name, "=", e.Value))
