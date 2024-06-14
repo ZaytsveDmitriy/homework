@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/require" //nolint:depguard
 )
 
 type UserRole string
@@ -42,19 +44,78 @@ func TestValidate(t *testing.T) {
 		expectedErr error
 	}{
 		{
+			App{
+				"12345",
+			},
+			nil,
+		},
+		{
+			App{
+				"1234",
+			},
+			ValidationErrors{ValidationError{Field: "Version", Err: ErrStringLenNotEqual}},
+		},
+		{
+			Response{
+				200,
+				"jig",
+			},
+			nil,
+		},
+		{
+			Response{
+				103,
+				"jig",
+			},
+			ValidationErrors{ValidationError{Field: "Code", Err: ErrIntNotContain}},
+		},
+		{
+			User{
+				"123456789012345678901234567890123456",
+				"Alex",
+				18,
+				"worker@Worker.com",
+				"stuff",
+				[]string{"+7123456789", "+7123456789"},
+				nil,
+			},
+			nil,
 			// Place your code here.
 		},
-		// ...
-		// Place your code here.
+		{
+			User{
+				"13456789012345678901234567890123456",
+				"Alex",
+				4,
+				"worker@Workercom",
+				"stuffer",
+				[]string{"+712345f678910", "+712345678910"},
+				nil,
+			},
+			ValidationErrors{
+				ValidationError{Field: "ID", Err: ErrStringLenNotEqual},
+				ValidationError{Field: "Age", Err: ErrIntLess},
+				ValidationError{Field: "Email", Err: ErrStringNotMatchRE},
+				ValidationError{Field: "Role", Err: ErrStringNotContain},
+				ValidationError{Field: "Phones", Err: ErrStringNotContain},
+			},
+		},
+		{
+			Token{
+				[]byte{12},
+				[]byte{23},
+				[]byte{12},
+			},
+			nil,
+		},
 	}
 
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
 			tt := tt
 			t.Parallel()
-
-			// Place your code here.
-			_ = tt
+			err := Validate(tt.in)
+			require.Equal(t, tt.expectedErr, err)
 		})
 	}
 }
