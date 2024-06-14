@@ -97,7 +97,7 @@ func TestValidate(t *testing.T) {
 				ValidationError{Field: "Age", Err: ErrIntLess},
 				ValidationError{Field: "Email", Err: ErrStringNotMatchRE},
 				ValidationError{Field: "Role", Err: ErrStringNotContain},
-				ValidationError{Field: "Phones", Err: ErrStringNotContain},
+				ValidationError{Field: "Phones", Err: ErrStringLenNotEqual},
 			},
 		},
 		{
