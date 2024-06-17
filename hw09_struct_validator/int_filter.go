@@ -28,7 +28,10 @@ type IntFilter struct {
 }
 
 func NewIntFilter(pattern string) (*IntFilter, error) {
-	var err error
+	var (
+		err          error
+		hasValidator bool
+	)
 
 	filter := IntFilter{
 		minLim: math.MinInt,
@@ -42,6 +45,7 @@ func NewIntFilter(pattern string) (*IntFilter, error) {
 		if err != nil {
 			return nil, ErrTemplateInvalid
 		}
+		hasValidator := true
 	}
 
 	maxMatch := maxRE.FindStringSubmatch(pattern)
@@ -50,6 +54,7 @@ func NewIntFilter(pattern string) (*IntFilter, error) {
 		if err != nil {
 			return nil, ErrTemplateInvalid
 		}
+		hasValidator := true
 	}
 
 	inMatch := inRE.FindStringSubmatch(pattern)
@@ -62,6 +67,11 @@ func NewIntFilter(pattern string) (*IntFilter, error) {
 			}
 			filter.inLim = append(filter.inLim, digit)
 		}
+		hasValidator := true
+	}
+
+	if !hasValidator {
+		return nil, ErrTemplateInvalid
 	}
 
 	return &filter, nil

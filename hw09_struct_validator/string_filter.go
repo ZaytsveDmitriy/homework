@@ -10,10 +10,9 @@ import (
 )
 
 var (
-	ErrStringTemplateInvalid = errors.New("validation template invalid")
-	ErrStringNotContain      = errors.New("value not containt in limit slice")
-	ErrStringLenNotEqual     = errors.New("value len not equal with len lim")
-	ErrStringNotMatchRE      = errors.New("value not match RE")
+	ErrStringNotContain  = errors.New("value not containt in limit slice")
+	ErrStringLenNotEqual = errors.New("value len not equal with len lim")
+	ErrStringNotMatchRE  = errors.New("value not match RE")
 )
 
 var (

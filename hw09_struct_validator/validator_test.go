@@ -36,6 +36,10 @@ type (
 		Code int    `validate:"in:200,404,500"`
 		Body string `json:"omitempty"`
 	}
+
+	BadVilidator struct {
+		BadDigits int `validate:"in:200,to,300"`
+	}
 )
 
 func TestValidate(t *testing.T) {

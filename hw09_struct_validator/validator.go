@@ -1,10 +1,13 @@
 package hw09structvalidator
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
 )
+
+var ErrNotStruct = errors.New("arg not a struct")
 
 type ValidationError struct {
 	Field string
@@ -25,6 +28,10 @@ func Validate(v interface{}) error {
 	// Place your code here.
 	var resError ValidationErrors
 	refl := reflect.ValueOf(v)
+	if refl.Type().Kind() != reflect.Struct {
+		return ErrNotStruct
+	}
+
 	for i := 0; i < refl.NumField(); i++ {
 		var err error
 
@@ -32,6 +39,11 @@ func Validate(v interface{}) error {
 		if !has {
 			continue
 		}
+
+		if !refl.Type().Field(i).IsExported() {
+			continue
+		}
+
 		fName := refl.Type().Field(i).Name
 		switch refl.Field(i).Type().Kind() {
 		case reflect.Int:
@@ -73,6 +85,10 @@ func Validate(v interface{}) error {
 			continue
 		}
 		if err != nil {
+			if errors.Is(err, ErrTemplateInvalid) {
+				return err
+			}
+
 			valErr := ValidationError{fName, err}
 			resError = append(resError, valErr)
 		}
