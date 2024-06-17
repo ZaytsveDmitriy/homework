@@ -45,7 +45,7 @@ func Validate(v interface{}) error {
 		}
 
 		fName := refl.Type().Field(i).Name
-		switch refl.Field(i).Type().Kind() {
+		switch refl.Field(i).Type().Kind() { //nolint:exhaustive
 		case reflect.Int:
 			val := refl.Field(i).Int()
 			err = ValidateInt(tag, val)
@@ -53,13 +53,13 @@ func Validate(v interface{}) error {
 			val := refl.Field(i).String()
 			err = ValidateString(tag, val)
 		case reflect.Slice:
-			switch refl.Field(i).Type().Elem().Kind() {
-			case reflect.Int:
-				l := refl.Field(i).Len()
-				if l < 1 {
-					continue
-				}
+			l := refl.Field(i).Len()
+			if l < 1 {
+				continue
+			}
 
+			switch refl.Field(i).Type().Elem().Kind() { //nolint:exhaustive
+			case reflect.Int:
 				val := refl.Field(i).Slice(0, l)
 				data := make([]int64, 0, l)
 				for i := 0; i < l; i++ {
@@ -68,11 +68,6 @@ func Validate(v interface{}) error {
 				err = ValidateInt(tag, data...)
 
 			case reflect.String:
-				l := refl.Field(i).Len()
-				if l < 1 {
-					continue
-				}
-
 				val := refl.Field(i).Slice(0, l)
 
 				data := make([]string, 0, l)
@@ -80,10 +75,13 @@ func Validate(v interface{}) error {
 					data = append(data, val.Index(i).String())
 				}
 				err = ValidateString(tag, data...)
+			default:
+				continue
 			}
-		case reflect.Struct:
+		default:
 			continue
 		}
+
 		if err != nil {
 			if errors.Is(err, ErrTemplateInvalid) {
 				return err
