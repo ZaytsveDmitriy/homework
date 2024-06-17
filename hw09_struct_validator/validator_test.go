@@ -112,6 +112,12 @@ func TestValidate(t *testing.T) {
 			},
 			nil,
 		},
+		{
+			BadVilidator{
+				3,
+			},
+			ErrTemplateInvalid,
+		},
 	}
 
 	for i, tt := range tests {

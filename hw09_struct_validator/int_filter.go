@@ -45,7 +45,7 @@ func NewIntFilter(pattern string) (*IntFilter, error) {
 		if err != nil {
 			return nil, ErrTemplateInvalid
 		}
-		hasValidator := true
+		hasValidator = true
 	}
 
 	maxMatch := maxRE.FindStringSubmatch(pattern)
@@ -54,7 +54,7 @@ func NewIntFilter(pattern string) (*IntFilter, error) {
 		if err != nil {
 			return nil, ErrTemplateInvalid
 		}
-		hasValidator := true
+		hasValidator = true
 	}
 
 	inMatch := inRE.FindStringSubmatch(pattern)
@@ -67,7 +67,7 @@ func NewIntFilter(pattern string) (*IntFilter, error) {
 			}
 			filter.inLim = append(filter.inLim, digit)
 		}
-		hasValidator := true
+		hasValidator = true
 	}
 
 	if !hasValidator {
