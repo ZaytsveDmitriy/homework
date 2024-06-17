@@ -1,11 +1,14 @@
 package hw10programoptimization
 
 import (
-	"encoding/json"
+	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"regexp"
 	"strings"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 type User struct {
@@ -31,35 +34,41 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 type users [100_000]User
 
 func getUsers(r io.Reader) (result users, err error) {
-	content, err := io.ReadAll(r)
-	if err != nil {
-		return
-	}
+	json := jsoniter.ConfigCompatibleWithStandardLibrary
+	reader := bufio.NewReader(r)
 
-	lines := strings.Split(string(content), "\n")
-	for i, line := range lines {
+	for i := 0; ; i++ {
+		line, _, err := reader.ReadLine()
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return result, nil
+			}
+			return result, err
+		}
 		var user User
-		if err = json.Unmarshal([]byte(line), &user); err != nil {
-			return
+		if err = json.Unmarshal(line, &user); err != nil {
+			return result, err
 		}
 		result[i] = user
 	}
-	return
 }
 
 func countDomains(u users, domain string) (DomainStat, error) {
-	result := make(DomainStat)
+	result := make(DomainStat, 100)
+
+	matcher, err := regexp.Compile("@(\\w+\\.)" + domain)
+	if err != nil {
+		return nil, err
+	}
 
 	for _, user := range u {
-		matched, err := regexp.Match("\\."+domain, []byte(user.Email))
-		if err != nil {
-			return nil, err
-		}
+		matched := matcher.FindSubmatch([]byte(user.Email))
 
-		if matched {
-			num := result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])]
+		if len(matched) != 0 {
+			key := strings.ToLower(string(matched[1]) + domain)
+			num := result[key]
 			num++
-			result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])] = num
+			result[key] = num
 		}
 	}
 	return result, nil
