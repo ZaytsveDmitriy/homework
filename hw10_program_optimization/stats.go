@@ -1,11 +1,15 @@
 package hw10programoptimization
 
 import (
+	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"regexp"
 	"strings"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 type User struct {
@@ -21,6 +25,49 @@ type User struct {
 type DomainStat map[string]int
 
 func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
+	var user User
+	const RE = "@(\\w+\\.)"
+
+	matcher, err := regexp.Compile(RE + domain)
+	if err != nil {
+		return nil, err
+	}
+
+	json := jsoniter.ConfigCompatibleWithStandardLibrary
+	reader := bufio.NewReader(r)
+	stat := make(DomainStat, 100)
+
+	for i := 0; ; i++ {
+		line, _, err := reader.ReadLine()
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			return nil, Error(err)
+		}
+		if err = json.Unmarshal(line, &user); err != nil {
+			return nil, Error(err)
+		}
+
+		matched := matcher.FindStringSubmatch(user.Email)
+
+		if len(matched) != 0 {
+			key := strings.ToLower(matched[1] + domain)
+			num := stat[key]
+			num++
+			stat[key] = num
+		}
+	}
+
+	return stat, nil
+}
+
+func Error(err error) error {
+	const message = "get users error: %w"
+	return fmt.Errorf(message, err)
+}
+
+func GetDomainStatAld(r io.Reader, domain string) (DomainStat, error) {
 	u, err := getUsers(r)
 	if err != nil {
 		return nil, fmt.Errorf("get users error: %w", err)
