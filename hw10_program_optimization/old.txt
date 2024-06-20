@@ -1,0 +1,16 @@
+goos: windows
+goarch: amd64
+pkg: github.com/fixme_my_friend/hw10_program_optimization
+cpu: AMD Ryzen 5 4600U with Radeon Graphics         
+BenchmarkStat-12    	      18	 603340328 ns/op	323850182 B/op	 3145400 allocs/op
+BenchmarkStat-12    	      19	 596397989 ns/op	323850720 B/op	 3145399 allocs/op
+BenchmarkStat-12    	      19	 613759174 ns/op	323864662 B/op	 3145401 allocs/op
+BenchmarkStat-12    	      19	 631961553 ns/op	323876405 B/op	 3145403 allocs/op
+BenchmarkStat-12    	      19	 605031747 ns/op	323890218 B/op	 3145404 allocs/op
+BenchmarkStat-12    	      19	 603927163 ns/op	323886168 B/op	 3145403 allocs/op
+BenchmarkStat-12    	      19	 618070068 ns/op	323899777 B/op	 3145405 allocs/op
+BenchmarkStat-12    	      19	 605580516 ns/op	323876121 B/op	 3145401 allocs/op
+BenchmarkStat-12    	      19	 613832063 ns/op	323915313 B/op	 3145405 allocs/op
+BenchmarkStat-12    	      19	 618188842 ns/op	323899456 B/op	 3145403 allocs/op
+PASS
+ok  	github.com/fixme_my_friend/hw10_program_optimization	136.506s
