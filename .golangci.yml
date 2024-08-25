@@ -23,7 +23,7 @@ linters:
   enable:
     - asciicheck
     - bodyclose
-    - depguard
+    # - depguard
     - dogsled
     - dupl
     - durationcheck
@@ -55,7 +55,7 @@ linters:
     - nolintlint
     - prealloc
     - predeclared
-    # - revive
+    - revive
     - staticcheck
     - stylecheck
     - tagliatelle
