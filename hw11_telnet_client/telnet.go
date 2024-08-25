@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"io"
 	"time"
 )
@@ -13,9 +14,11 @@ type TelnetClient interface {
 }
 
 func NewTelnetClient(address string, timeout time.Duration, in io.ReadCloser, out io.Writer) TelnetClient {
-	// Place your code here.
-	return nil
+	client := SimpleTelnetClient{
+		in:      bufio.NewReaderSize(in, 1500),
+		out:     out,
+		timeout: timeout,
+		address: address,
+	}
+	return &client
 }
-
-// Place your code here.
-// P.S. Author's solution takes no more than 50 lines.
